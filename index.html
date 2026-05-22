@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Don Ramón Empanadas</title>
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Don Ramón">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #1a1a1a; }
+    .app { max-width: 480px; margin: 0 auto; padding: 0 0 80px; min-height: 100vh; background: #f5f5f5; }
+
+    /* HEADER */
+    .header { background: white; border-bottom: 1px solid #e8e8e8; padding: 16px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 40; }
+    .header-icon { width: 40px; height: 40px; background: #EEEDFE; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+    .header h1 { font-size: 17px; font-weight: 600; }
+    .header p { font-size: 12px; color: #888; }
+    .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; margin-left: auto; flex-shrink: 0; transition: background 0.3s; }
+    .sync-dot.ok { background: #1D9E75; }
+    .sync-dot.loading { background: #EF9F27; }
+    .sync-dot.error { background: #E24B4A; }
+
+    /* TABS */
+    .tabs { display: flex; border-bottom: 1px solid #e8e8e8; background: white; position: sticky; top: 73px; z-index: 39; }
+    .tab { flex: 1; padding: 10px 2px; font-size: 11px; text-align: center; cursor: pointer; color: #999; border-bottom: 2px solid transparent; border: none; background: none; font-family: inherit; }
+    .tab.active { color: #534AB7; border-bottom: 2px solid #534AB7; font-weight: 600; }
+
+    /* SCREENS */
+    .screen { display: none; padding: 16px; }
+    .screen.active { display: block; }
+    .section-title { font-size: 11px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 0.06em; margin: 20px 0 10px; }
+    .section-title:first-child { margin-top: 4px; }
+
+    /* CARDS */
+    .card { background: white; border: 1px solid #ebebeb; border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; }
+
+    /* TOGGLE BUTTONS */
+    .toggle-group { display: grid; gap: 8px; margin-bottom: 14px; }
+    .toggle-group.col2 { grid-template-columns: 1fr 1fr; }
+    .tog-btn { padding: 11px 8px; border: 1px solid #e0e0e0; border-radius: 10px; background: #f8f8f8; font-size: 14px; cursor: pointer; font-family: inherit; color: #333; text-align: center; transition: all 0.15s; line-height: 1.3; }
+    .tog-btn.active-purple { background: #EEEDFE; border-color: #AFA9EC; color: #3C3489; font-weight: 600; }
+    .tog-btn.active-green  { background: #EAF3DE; border-color: #97C459; color: #27500A; font-weight: 600; }
+    .tog-btn.active-amber  { background: #FAEEDA; border-color: #EF9F27; color: #412402; font-weight: 600; }
+    .tog-btn.active-blue   { background: #E6F1FB; border-color: #85B7EB; color: #042C53; font-weight: 600; }
+
+    /* CANTIDAD */
+    .cant-control { display: flex; align-items: center; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; background: #f8f8f8; margin-bottom: 8px; }
+    .cnt-btn { width: 60px; height: 68px; border: none; background: none; font-size: 28px; cursor: pointer; color: #333; display: flex; align-items: center; justify-content: center; font-family: inherit; flex-shrink: 0; -webkit-tap-highlight-color: transparent; }
+    .cnt-btn:active { background: #eee; }
+    .cnt-center { flex: 1; text-align: center; border-left: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; padding: 8px 0; }
+    .cnt-label { font-size: 22px; font-weight: 600; color: #3C3489; line-height: 1.1; }
+    .cnt-num   { font-size: 13px; color: #7F77DD; margin-top: 3px; }
+    .custom-cant-wrap { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
+    .custom-cant-wrap input { flex: 1; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 10px; background: #f8f8f8; font-size: 16px; font-family: inherit; color: #333; }
+    .custom-cant-wrap input:focus { outline: none; border-color: #AFA9EC; }
+    .custom-cant-wrap input.active-border { border-color: #AFA9EC; background: #EEEDFE; }
+
+    /* FIELDS */
+    .field-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .field-label { font-size: 14px; color: #888; min-width: 80px; }
+    .field-input { flex: 1; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 10px; background: #f8f8f8; font-size: 16px; font-family: inherit; color: #333; }
+    .field-input:focus { outline: none; border-color: #AFA9EC; }
+
+    /* SAVE BTN */
+    .save-btn { width: 100%; padding: 15px; background: #534AB7; color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; font-family: inherit; margin-top: 8px; -webkit-tap-highlight-color: transparent; }
+    .save-btn:active { opacity: 0.85; transform: scale(0.99); }
+
+    /* TOTAL BOX */
+    .total-box { background: #EEEDFE; border-radius: 12px; padding: 14px 16px; margin: 14px 0 6px; }
+    .total-box-row { display: flex; justify-content: space-between; align-items: center; }
+    .total-box .lbl { font-size: 14px; color: #534AB7; }
+    .total-box .sublbl { font-size: 12px; color: #7F77DD; margin-top: 2px; }
+    .total-box .amt { font-size: 28px; font-weight: 700; color: #3C3489; }
+    .no-price-warn { background: #FAEEDA; border-radius: 12px; padding: 10px 14px; font-size: 13px; color: #633806; margin: 12px 0 6px; display: flex; align-items: center; gap: 8px; }
+
+    /* STATS */
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    .stat-card { background: white; border: 1px solid #ebebeb; border-radius: 12px; padding: 14px; }
+    .stat-lbl { font-size: 11px; color: #999; margin-bottom: 4px; font-weight: 500; }
+    .stat-val { font-size: 24px; font-weight: 700; }
+    .stat-val.green  { color: #3B6D11; }
+    .stat-val.red    { color: #A32D2D; }
+    .stat-val.purple { color: #534AB7; }
+    .stat-val.blue   { color: #185FA5; }
+
+    /* ENTRIES */
+    .entry-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+    .entry-item:last-child { border-bottom: none; }
+    .entry-left .name { font-size: 14px; font-weight: 600; }
+    .entry-left .sub  { font-size: 12px; color: #999; margin-top: 3px; }
+    .entry-right { text-align: right; flex-shrink: 0; margin-left: 8px; }
+    .entry-right .amount { font-size: 15px; font-weight: 700; }
+    .entry-right .delete-btn { font-size: 11px; color: #E24B4A; cursor: pointer; margin-top: 3px; display: block; border: none; background: none; font-family: inherit; padding: 0; }
+
+    /* BADGES */
+    .badge { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 20px; font-weight: 600; margin-right: 2px; }
+    .badge.negocio    { background: #E6F1FB; color: #0C447C; }
+    .badge.particular { background: #EAF3DE; color: #27500A; }
+    .badge.carne  { background: #FAEEDA; color: #633806; }
+    .badge.jyq    { background: #EEEDFE; color: #3C3489; }
+    .badge.horno  { background: #f0f0f0; color: #555; }
+    .badge.fritas { background: #FAECE7; color: #4A1B0C; }
+
+    /* BARS */
+    .bar-row { margin-bottom: 14px; }
+    .bar-row:last-child { margin-bottom: 0; }
+    .bar-head { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
+    .bar-head span:first-child { color: #888; }
+    .bar-head span:last-child { font-weight: 600; }
+    .bar-track { height: 8px; background: #f0f0f0; border-radius: 4px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+
+    /* EMPTY */
+    .empty-state { text-align: center; padding: 36px 20px; color: #bbb; font-size: 14px; }
+    .empty-icon { font-size: 36px; margin-bottom: 8px; opacity: 0.5; }
+
+    /* MONTH NAV */
+    .month-selector { display: flex; align-items: center; justify-content: space-between; padding: 4px 0 16px; }
+    .month-nav { border: none; background: none; font-size: 24px; cursor: pointer; color: #999; padding: 4px 12px; }
+    .month-name { font-size: 17px; font-weight: 600; }
+
+    /* PRICE CONFIG */
+    .price-config-card { background: white; border: 1px solid #ebebeb; border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; }
+    .price-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .price-row:last-child { margin-bottom: 0; }
+    .price-desc { flex: 1; font-size: 14px; font-weight: 500; }
+    .price-desc .sub { font-size: 11px; color: #999; margin-top: 2px; font-weight: 400; }
+    .price-input-wrap { position: relative; }
+    .price-input-wrap span { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #999; font-size: 14px; pointer-events: none; }
+    .price-input-wrap input { width: 100px; padding: 9px 9px 9px 22px; border: 1px solid #e0e0e0; border-radius: 10px; background: #f8f8f8; font-size: 16px; font-family: inherit; color: #333; }
+    .price-input-wrap input:focus { outline: none; border-color: #AFA9EC; }
+    .divider { height: 1px; background: #f0f0f0; margin: 10px 0; }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 11px 22px; border-radius: 22px; font-size: 14px; opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap; z-index: 200; font-weight: 500; }
+    .toast.show { opacity: 1; }
+
+    /* LOADING */
+    .loading-screen { display: flex; align-items: center; justify-content: center; min-height: 200px; color: #999; font-size: 15px; flex-direction: column; gap: 12px; }
+    .spinner { width: 28px; height: 28px; border: 3px solid #eee; border-top-color: #534AB7; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="header-icon">🥟</div>
+    <div>
+      <h1>Don Ramón Empanadas</h1>
+      <p id="header-date">Cargando...</p>
+    </div>
+    <div class="sync-dot" id="sync-dot" title="Estado de conexión"></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showScreen('vender')"><i class="ti ti-plus"></i><br>Vender</button>
+    <button class="tab" onclick="showScreen('gastos')"><i class="ti ti-receipt"></i><br>Gastos</button>
+    <button class="tab" onclick="showScreen('historial')"><i class="ti ti-list"></i><br>Hoy</button>
+    <button class="tab" onclick="showScreen('resumen')"><i class="ti ti-chart-bar"></i><br>Mes</button>
+    <button class="tab" onclick="showScreen('precios')"><i class="ti ti-settings"></i><br>Precios</button>
+  </div>
+
+  <!-- VENDER -->
+  <div id="screen-vender" class="screen active">
+    <p class="section-title">Tipo de cliente</p>
+    <div class="toggle-group col2">
+      <button class="tog-btn active-purple" id="btn-negocio"    onclick="setTipo('negocio')"><i class="ti ti-building-store"></i> Negocio</button>
+      <button class="tog-btn"               id="btn-particular" onclick="setTipo('particular')"><i class="ti ti-user"></i> Particular</button>
+    </div>
+    <p class="section-title">Relleno</p>
+    <div class="toggle-group col2">
+      <button class="tog-btn active-amber" id="btn-carne" onclick="setRelleno('carne')">🥩 Carne</button>
+      <button class="tog-btn"             id="btn-jyq"   onclick="setRelleno('jyq')">🧀 Jamón y queso</button>
+    </div>
+    <p class="section-title">Cocción</p>
+    <div class="toggle-group col2">
+      <button class="tog-btn active-blue" id="btn-horno"  onclick="setCoccion('horno')">🔥 Al horno</button>
+      <button class="tog-btn"            id="btn-fritas" onclick="setCoccion('fritas')">🫕 Fritas</button>
+    </div>
+    <p class="section-title">Cantidad</p>
+    <div class="cant-control">
+      <button class="cnt-btn" onclick="cambiarCant(-1)" aria-label="Restar">−</button>
+      <div class="cnt-center">
+        <div class="cnt-label" id="cnt-label">Media docena</div>
+        <div class="cnt-num"   id="cnt-num">6 empanadas</div>
+      </div>
+      <button class="cnt-btn" onclick="cambiarCant(1)" aria-label="Sumar">+</button>
+    </div>
+    <div class="custom-cant-wrap">
+      <span style="font-size:14px;color:#999;white-space:nowrap">Otra cantidad</span>
+      <input type="number" id="cant-custom" placeholder="Ej: 8" min="1" oninput="onCustomCant()" inputmode="numeric">
+    </div>
+    <div id="total-box-container"></div>
+    <div class="field-row" style="margin-top:12px;margin-bottom:0">
+      <span class="field-label">Cliente</span>
+      <input class="field-input" type="text" id="cliente-input" placeholder="Opcional">
+    </div>
+    <button class="save-btn" onclick="guardarVenta()"><i class="ti ti-check"></i> Registrar venta</button>
+  </div>
+
+  <!-- GASTOS -->
+  <div id="screen-gastos" class="screen">
+    <p class="section-title">Registrar gasto</p>
+    <div class="card">
+      <div class="field-row"><span class="field-label">Detalle</span><input class="field-input" type="text" id="gasto-detalle" placeholder="Ej: harina, aceite..."></div>
+      <div class="field-row" style="margin-bottom:0"><span class="field-label">Monto</span><input class="field-input" type="number" id="gasto-monto" placeholder="$0" inputmode="numeric"></div>
+    </div>
+    <button class="save-btn" onclick="guardarGasto()" style="background:#A32D2D"><i class="ti ti-check"></i> Registrar gasto</button>
+    <p class="section-title" style="margin-top:24px">Gastos de hoy</p>
+    <div class="card" id="lista-gastos-hoy"><div class="empty-state"><div class="empty-icon"><i class="ti ti-receipt-off"></i></div>Sin gastos hoy</div></div>
+  </div>
+
+  <!-- HOY -->
+  <div id="screen-historial" class="screen">
+    <p class="section-title">Ventas de hoy</p>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-lbl">Ventas</div><div class="stat-val purple" id="hoy-count">—</div></div>
+      <div class="stat-card"><div class="stat-lbl">Total</div><div class="stat-val green" id="hoy-total">—</div></div>
+    </div>
+    <div class="card" id="lista-hoy"><div class="loading-screen"><div class="spinner"></div>Cargando...</div></div>
+  </div>
+
+  <!-- MES -->
+  <div id="screen-resumen" class="screen">
+    <div class="month-selector">
+      <button class="month-nav" onclick="cambiarMes(-1)">‹</button>
+      <span class="month-name" id="mes-nombre">—</span>
+      <button class="month-nav" onclick="cambiarMes(1)">›</button>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-lbl">Ingresos</div><div class="stat-val green"  id="mes-ingresos">—</div></div>
+      <div class="stat-card"><div class="stat-lbl">Gastos</div><div class="stat-val red"     id="mes-gastos">—</div></div>
+      <div class="stat-card"><div class="stat-lbl">Ganancia neta</div><div class="stat-val purple" id="mes-ganancia">—</div></div>
+      <div class="stat-card"><div class="stat-lbl">Empanadas</div><div class="stat-val blue"   id="mes-empanadas">—</div></div>
+    </div>
+    <p class="section-title">Canal de venta</p>
+    <div class="card">
+      <div class="bar-row"><div class="bar-head"><span>Negocios</span><span id="bar-neg-amt">$0</span></div><div class="bar-track"><div class="bar-fill" id="bar-neg" style="background:#534AB7;width:0%"></div></div></div>
+      <div class="bar-row"><div class="bar-head"><span>Particulares</span><span id="bar-part-amt">$0</span></div><div class="bar-track"><div class="bar-fill" id="bar-part" style="background:#1D9E75;width:0%"></div></div></div>
+    </div>
+    <p class="section-title">Relleno más vendido</p>
+    <div class="card">
+      <div class="bar-row"><div class="bar-head"><span>🥩 Carne</span><span id="bar-carne-cant">0 emp.</span></div><div class="bar-track"><div class="bar-fill" id="bar-carne" style="background:#EF9F27;width:0%"></div></div></div>
+      <div class="bar-row"><div class="bar-head"><span>🧀 Jamón y queso</span><span id="bar-jyq-cant">0 emp.</span></div><div class="bar-track"><div class="bar-fill" id="bar-jyq" style="background:#AFA9EC;width:0%"></div></div></div>
+    </div>
+    <p class="section-title">Cocción más vendida</p>
+    <div class="card">
+      <div class="bar-row"><div class="bar-head"><span>🔥 Al horno</span><span id="bar-horno-cant">0 emp.</span></div><div class="bar-track"><div class="bar-fill" id="bar-horno" style="background:#378ADD;width:0%"></div></div></div>
+      <div class="bar-row"><div class="bar-head"><span>🫕 Fritas</span><span id="bar-fritas-cant">0 emp.</span></div><div class="bar-track"><div class="bar-fill" id="bar-fritas" style="background:#D85A30;width:0%"></div></div></div>
+    </div>
+    <p class="section-title">Detalle del mes</p>
+    <div class="card" id="lista-mes"><div class="loading-screen"><div class="spinner"></div>Cargando...</div></div>
+  </div>
+
+  <!-- PRECIOS -->
+  <div id="screen-precios" class="screen">
+    <p class="section-title">Precios de la docena</p>
+    <p style="font-size:13px;color:#999;margin-bottom:14px">Configurá el precio por docena. Las demás cantidades se calculan proporcionalmente.</p>
+    <div class="price-config-card">
+      <div class="price-row">
+        <div class="price-desc"><i class="ti ti-building-store" style="color:#185FA5"></i> Negocio<div class="sub">por docena</div></div>
+        <div class="price-input-wrap"><span>$</span><input type="number" id="precio-negocio" placeholder="0" oninput="savePrecios()" inputmode="numeric"></div>
+      </div>
+      <div class="divider"></div>
+      <div class="price-row">
+        <div class="price-desc"><i class="ti ti-user" style="color:#3B6D11"></i> Particular<div class="sub">por docena</div></div>
+        <div class="price-input-wrap"><span>$</span><input type="number" id="precio-particular" placeholder="0" oninput="savePrecios()" inputmode="numeric"></div>
+      </div>
+    </div>
+    <div id="preview-precios"></div>
+    <p class="section-title" style="margin-top:24px">Historial de precios</p>
+    <div id="historial-precios"><div class="empty-state" style="padding:20px">Sin cambios registrados</div></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where, orderBy, onSnapshot, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyC4DFd5naYb_IUo4PrfuRCRdWAx97HCuCk",
+    authDomain: "don-ramon-empanadas.firebaseapp.com",
+    projectId: "don-ramon-empanadas",
+    storageBucket: "don-ramon-empanadas.firebasestorage.app",
+    messagingSenderId: "849317750753",
+    appId: "1:849317750753:web:82ba799821954a87e614a0"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+
+  // ── Estado ──────────────────────────────────────────
+  let tipo='negocio', relleno='carne', coccion='horno';
+  let medias=1, modoCustom=false, cantCustomVal=0, mesOffset=0;
+  let preciosCache = {};
+  let registrosCache = [];
+
+  // ── Helpers fecha ────────────────────────────────────
+  function hoyKey() {
+    const d=new Date();
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  }
+  function mesKey(o) {
+    const d=new Date(); d.setMonth(d.getMonth()+o);
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+  }
+
+  // ── Sync dot ─────────────────────────────────────────
+  function setSyncDot(state) {
+    const dot = document.getElementById('sync-dot');
+    dot.className = 'sync-dot ' + state;
+  }
+
+  // ── Precios (Firestore doc único) ────────────────────
+  async function loadPrecios() {
+    try {
+      const snap = await getDoc(doc(db,'config','precios'));
+      if (snap.exists()) preciosCache = snap.data();
+      renderPrecios();
+    } catch(e) { console.error(e); }
+  }
+
+  window.savePrecios = async function() {
+    const neg  = parseFloat(document.getElementById('precio-negocio').value);
+    const part = parseFloat(document.getElementById('precio-particular').value);
+    const mk   = mesKey(0);
+    if (!preciosCache[mk]) preciosCache[mk] = {};
+    if (neg  > 0) preciosCache[mk].negocio    = Math.round(neg);
+    if (part > 0) preciosCache[mk].particular = Math.round(part);
+    try {
+      setSyncDot('loading');
+      await setDoc(doc(db,'config','precios'), preciosCache);
+      setSyncDot('ok');
+    } catch(e) { setSyncDot('error'); }
+    renderPrecios();
+  }
+
+  function getPrecioDocena(subtipo) {
+    const mk = mesKey(0);
+    if (preciosCache[mk] && preciosCache[mk][subtipo]) return preciosCache[mk][subtipo];
+    // buscar mes anterior más cercano
+    const keys = Object.keys(preciosCache).sort().reverse();
+    for (const k of keys) { if (preciosCache[k][subtipo]) return preciosCache[k][subtipo]; }
+    return null;
+  }
+
+  function calcTotal(subtipo, cant) {
+    const d = getPrecioDocena(subtipo);
+    return d ? Math.round((cant/12)*d) : null;
+  }
+
+  // ── Registros (Firestore collection) ────────────────
+  function setupListener() {
+    onSnapshot(collection(db,'registros'), (snap) => {
+      registrosCache = snap.docs.map(d=>({id:d.id,...d.data()}));
+      setSyncDot('ok');
+      // refrescar pantalla activa
+      const active = document.querySelector('.screen.active');
+      if (active) {
+        const name = active.id.replace('screen-','');
+        if (name==='historial') renderHoy();
+        if (name==='resumen')   renderMes();
+        if (name==='gastos')    renderGastosHoy();
+      }
+    }, () => setSyncDot('error'));
+  }
+
+  async function agregarRegistro(data) {
+    setSyncDot('loading');
+    try {
+      await addDoc(collection(db,'registros'), data);
+      setSyncDot('ok');
+    } catch(e) { setSyncDot('error'); showToast('Error al guardar'); }
+  }
+
+  window.eliminar = async function(id) {
+    if (!confirm('¿Eliminar este registro?')) return;
+    try {
+      setSyncDot('loading');
+      await deleteDoc(doc(db,'registros',id));
+      setSyncDot('ok');
+    } catch(e) { setSyncDot('error'); showToast('Error al eliminar'); }
+  }
+
+  // ── Pantallas ────────────────────────────────────────
+  window.showScreen = function(name) {
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.getElementById('screen-'+name).classList.add('active');
+    ['vender','gastos','historial','resumen','precios'].forEach((n,i)=>{
+      if(n===name) document.querySelectorAll('.tab')[i].classList.add('active');
+    });
+    if(name==='historial') renderHoy();
+    if(name==='resumen')   renderMes();
+    if(name==='gastos')    renderGastosHoy();
+    if(name==='precios')   renderPrecios();
+    if(name==='vender')    updateUI();
+  }
+
+  // ── Setters tipo/relleno/coccion ─────────────────────
+  window.setTipo = function(t) {
+    tipo=t;
+    document.getElementById('btn-negocio').className    = 'tog-btn'+(t==='negocio'   ?' active-purple':'');
+    document.getElementById('btn-particular').className = 'tog-btn'+(t==='particular'?' active-green':'');
+    updateTotalBox();
+  }
+  window.setRelleno = function(r) {
+    relleno=r;
+    document.getElementById('btn-carne').className='tog-btn'+(r==='carne'?' active-amber':'');
+    document.getElementById('btn-jyq').className  ='tog-btn'+(r==='jyq'  ?' active-purple':'');
+  }
+  window.setCoccion = function(c) {
+    coccion=c;
+    document.getElementById('btn-horno').className ='tog-btn'+(c==='horno' ?' active-blue':'');
+    document.getElementById('btn-fritas').className='tog-btn'+(c==='fritas'?' active-amber':'');
+  }
+
+  // ── Cantidad ─────────────────────────────────────────
+  function getCantidad() { return modoCustom ? cantCustomVal : medias*6; }
+
+  function getLabelGrande() {
+    if (modoCustom) return cantCustomVal+' emp.';
+    if (medias===1) return 'Media docena';
+    if (medias===2) return 'Docena';
+    if (medias%2===0) return (medias/2)+' docenas';
+    const ent=Math.floor(medias/2);
+    return (ent>0?ent+' doc. y ':'')+'media';
+  }
+
+  window.cambiarCant = function(d) {
+    medias=Math.max(1,medias+d); modoCustom=false;
+    document.getElementById('cant-custom').value='';
+    document.getElementById('cant-custom').classList.remove('active-border');
+    updateUI();
+  }
+  window.onCustomCant = function() {
+    const val=parseInt(document.getElementById('cant-custom').value);
+    if(val&&val>0){ cantCustomVal=val; modoCustom=true; document.getElementById('cant-custom').classList.add('active-border'); }
+    else { modoCustom=false; }
+    updateUI();
+  }
+
+  function updateUI() {
+    document.getElementById('cnt-label').textContent=getLabelGrande();
+    document.getElementById('cnt-num').textContent=getCantidad()+' empanadas';
+    updateTotalBox();
+  }
+
+  function updateTotalBox() {
+    const cant=getCantidad(), total=calcTotal(tipo,cant), doc2=getPrecioDocena(tipo);
+    const c=document.getElementById('total-box-container');
+    if(!cant||cant<1){c.innerHTML='';return;}
+    if(total===null){
+      c.innerHTML=`<div class="no-price-warn"><i class="ti ti-alert-circle"></i> Sin precio para ${tipo==='negocio'?'negocios':'particulares'}. Configuralo en <b>Precios</b>.</div>`;
+    } else {
+      c.innerHTML=`<div class="total-box"><div class="total-box-row">
+        <div><div class="lbl">${getLabelGrande()}</div><div class="sublbl">$${(doc2/12).toFixed(1)} por emp.</div></div>
+        <div class="amt">$${total.toLocaleString('es-AR')}</div>
+      </div></div>`;
+    }
+  }
+
+  // ── Guardar venta ────────────────────────────────────
+  window.guardarVenta = async function() {
+    const cant=getCantidad(), total=calcTotal(tipo,cant);
+    if(!cant||cant<1){showToast('Elegí la cantidad');return;}
+    if(total===null){showToast('Configurá el precio primero');return;}
+    const precioU=getPrecioDocena(tipo)/12;
+    const cliente=document.getElementById('cliente-input').value.trim();
+    await agregarRegistro({
+      tipo:'venta', subtipo:tipo, relleno, coccion,
+      cantidad:cant, precioUnitario:Math.round(precioU*100)/100,
+      total, cliente, fecha:hoyKey(), ts:Date.now()
+    });
+    document.getElementById('cliente-input').value='';
+    document.getElementById('cant-custom').value='';
+    document.getElementById('cant-custom').classList.remove('active-border');
+    medias=1; modoCustom=false; cantCustomVal=0;
+    updateUI();
+    showToast('Venta registrada ✓');
+  }
+
+  // ── Guardar gasto ────────────────────────────────────
+  window.guardarGasto = async function() {
+    const detalle=document.getElementById('gasto-detalle').value.trim();
+    const monto=parseFloat(document.getElementById('gasto-monto').value);
+    if(!detalle){showToast('Escribí el detalle');return;}
+    if(!monto||monto<=0){showToast('Ingresá el monto');return;}
+    await agregarRegistro({tipo:'gasto',detalle,monto:Math.round(monto),fecha:hoyKey(),ts:Date.now()});
+    document.getElementById('gasto-detalle').value='';
+    document.getElementById('gasto-monto').value='';
+    showToast('Gasto registrado ✓');
+  }
+
+  // ── Render Hoy ───────────────────────────────────────
+  function renderHoy() {
+    const hoy=hoyKey();
+    const v=registrosCache.filter(r=>r.fecha===hoy&&r.tipo==='venta');
+    document.getElementById('hoy-count').textContent=v.length;
+    document.getElementById('hoy-total').textContent='$'+v.reduce((s,r)=>s+r.total,0).toLocaleString('es-AR');
+    const lista=document.getElementById('lista-hoy');
+    if(!v.length){lista.innerHTML='<div class="empty-state"><div class="empty-icon"><i class="ti ti-clock"></i></div>Nada registrado hoy</div>';return;}
+    lista.innerHTML=[...v].sort((a,b)=>b.ts-a.ts).map(r=>`
+      <div class="entry-item">
+        <div class="entry-left">
+          <div class="name">${r.cantidad} emp. <span class="badge ${r.subtipo}">${r.subtipo==='negocio'?'Negocio':'Particular'}</span></div>
+          <div class="sub"><span class="badge ${r.relleno}">${r.relleno==='carne'?'🥩 Carne':'🧀 JyQ'}</span><span class="badge ${r.coccion}">${r.coccion==='horno'?'🔥 Horno':'🫕 Fritas'}</span>${r.cliente?' · '+r.cliente:''}</div>
+        </div>
+        <div class="entry-right"><div class="amount">$${r.total.toLocaleString('es-AR')}</div><button class="delete-btn" onclick="eliminar('${r.id}')">eliminar</button></div>
+      </div>`).join('');
+  }
+
+  // ── Render Gastos Hoy ────────────────────────────────
+  function renderGastosHoy() {
+    const g=registrosCache.filter(r=>r.fecha===hoyKey()&&r.tipo==='gasto');
+    const lista=document.getElementById('lista-gastos-hoy');
+    if(!g.length){lista.innerHTML='<div class="empty-state"><div class="empty-icon"><i class="ti ti-receipt-off"></i></div>Sin gastos hoy</div>';return;}
+    lista.innerHTML=[...g].sort((a,b)=>b.ts-a.ts).map(r=>`
+      <div class="entry-item">
+        <div class="entry-left"><div class="name">${r.detalle}</div></div>
+        <div class="entry-right"><div class="amount" style="color:#A32D2D">-$${r.monto.toLocaleString('es-AR')}</div><button class="delete-btn" onclick="eliminar('${r.id}')">eliminar</button></div>
+      </div>`).join('');
+  }
+
+  // ── Render Mes ───────────────────────────────────────
+  window.cambiarMes = function(d){mesOffset+=d;renderMes();}
+
+  function setBar(id,val,max,suf){
+    document.getElementById(id+'-cant').textContent=val.toLocaleString('es-AR')+suf;
+    document.getElementById(id).style.width=Math.round(val/Math.max(max,1)*100)+'%';
+  }
+
+  function renderMes() {
+    const mk=mesKey(mesOffset);
+    const meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    const [y,m]=mk.split('-');
+    document.getElementById('mes-nombre').textContent=meses[parseInt(m)-1]+' '+y;
+    const delMes=registrosCache.filter(r=>r.fecha&&r.fecha.startsWith(mk));
+    const ventas=delMes.filter(r=>r.tipo==='venta'), gastos=delMes.filter(r=>r.tipo==='gasto');
+    const ingresos=ventas.reduce((s,r)=>s+r.total,0);
+    const totalGastos=gastos.reduce((s,r)=>s+r.monto,0);
+    const empanadas=ventas.reduce((s,r)=>s+r.cantidad,0);
+    document.getElementById('mes-ingresos').textContent='$'+ingresos.toLocaleString('es-AR');
+    document.getElementById('mes-gastos').textContent='$'+totalGastos.toLocaleString('es-AR');
+    document.getElementById('mes-ganancia').textContent='$'+(ingresos-totalGastos).toLocaleString('es-AR');
+    document.getElementById('mes-empanadas').textContent=empanadas.toLocaleString('es-AR');
+    const negT=ventas.filter(r=>r.subtipo==='negocio').reduce((s,r)=>s+r.total,0);
+    const partT=ventas.filter(r=>r.subtipo==='particular').reduce((s,r)=>s+r.total,0);
+    document.getElementById('bar-neg-amt').textContent='$'+negT.toLocaleString('es-AR');
+    document.getElementById('bar-part-amt').textContent='$'+partT.toLocaleString('es-AR');
+    document.getElementById('bar-neg').style.width=Math.round(negT/Math.max(negT,partT,1)*100)+'%';
+    document.getElementById('bar-part').style.width=Math.round(partT/Math.max(negT,partT,1)*100)+'%';
+    const carneQ=ventas.filter(r=>r.relleno==='carne').reduce((s,r)=>s+r.cantidad,0);
+    const jyqQ=ventas.filter(r=>r.relleno==='jyq').reduce((s,r)=>s+r.cantidad,0);
+    setBar('bar-carne',carneQ,Math.max(carneQ,jyqQ),' emp.');
+    setBar('bar-jyq',jyqQ,Math.max(carneQ,jyqQ),' emp.');
+    const hornoQ=ventas.filter(r=>r.coccion==='horno').reduce((s,r)=>s+r.cantidad,0);
+    const fritasQ=ventas.filter(r=>r.coccion==='fritas').reduce((s,r)=>s+r.cantidad,0);
+    setBar('bar-horno',hornoQ,Math.max(hornoQ,fritasQ),' emp.');
+    setBar('bar-fritas',fritasQ,Math.max(hornoQ,fritasQ),' emp.');
+    const lista=document.getElementById('lista-mes');
+    const dias={};
+    delMes.forEach(r=>{if(!dias[r.fecha])dias[r.fecha]=[];dias[r.fecha].push(r);});
+    const fechas=Object.keys(dias).sort().reverse();
+    if(!fechas.length){lista.innerHTML='<div class="empty-state">Sin registros este mes</div>';return;}
+    lista.innerHTML=fechas.map(f=>{
+      const d=parseInt(f.split('-')[2]), items=dias[f];
+      const totalDia=items.reduce((s,r)=>s+(r.total||0)-(r.monto||0),0);
+      return `<div style="padding:10px 0;border-bottom:1px solid #f0f0f0">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+          <span style="font-size:14px;font-weight:600">Día ${d}</span>
+          <span style="font-size:14px;font-weight:700;color:${totalDia>=0?'#3B6D11':'#A32D2D'}">$${totalDia.toLocaleString('es-AR')}</span>
+        </div>
+        ${items.map(r=>r.tipo==='venta'
+          ?`<div style="font-size:12px;color:#888;margin-bottom:3px">${r.cantidad} emp. <span class="badge ${r.relleno}">${r.relleno==='carne'?'🥩 Carne':'🧀 JyQ'}</span><span class="badge ${r.coccion}">${r.coccion==='horno'?'🔥 Horno':'🫕 Fritas'}</span> ${r.subtipo==='negocio'?'Negocio':'Particular'}${r.cliente?' · '+r.cliente:''} → $${r.total.toLocaleString('es-AR')}</div>`
+          :`<div style="font-size:12px;color:#A32D2D;margin-bottom:3px">${r.detalle} → -$${r.monto.toLocaleString('es-AR')}</div>`
+        ).join('')}
+      </div>`;
+    }).join('');
+  }
+
+  // ── Render Precios ───────────────────────────────────
+  function renderPrecios() {
+    const mk=mesKey(0);
+    const neg  = preciosCache[mk]?.negocio;
+    const part = preciosCache[mk]?.particular;
+    if(neg)  document.getElementById('precio-negocio').value=neg;
+    if(part) document.getElementById('precio-particular').value=part;
+    const prev=document.getElementById('preview-precios');
+    if(neg||part){
+      prev.innerHTML=`<div class="card" style="font-size:13px">
+        ${neg?`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f5f5f5"><span style="color:#999">Negocio — media doc.</span><span style="font-weight:600">$${Math.round(neg/2).toLocaleString('es-AR')}</span></div>
+               <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f5f5f5"><span style="color:#999">Negocio — docena</span><span style="font-weight:600">$${neg.toLocaleString('es-AR')}</span></div>
+               <div style="display:flex;justify-content:space-between;padding:5px 0"><span style="color:#999">Negocio — por emp.</span><span style="font-weight:600">$${(neg/12).toFixed(1)}</span></div>`:''}
+        ${neg&&part?'<div style="height:1px;background:#f0f0f0;margin:8px 0"></div>':''}
+        ${part?`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f5f5f5"><span style="color:#999">Particular — media doc.</span><span style="font-weight:600">$${Math.round(part/2).toLocaleString('es-AR')}</span></div>
+                <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f5f5f5"><span style="color:#999">Particular — docena</span><span style="font-weight:600">$${part.toLocaleString('es-AR')}</span></div>
+                <div style="display:flex;justify-content:space-between;padding:5px 0"><span style="color:#999">Particular — por emp.</span><span style="font-weight:600">$${(part/12).toFixed(1)}</span></div>`:''}
+      </div>`;
+    } else { prev.innerHTML=''; }
+    const hist=document.getElementById('historial-precios');
+    const meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    const keys=Object.keys(preciosCache).sort().reverse();
+    if(!keys.length){hist.innerHTML='<div class="empty-state" style="padding:20px">Sin precios configurados</div>';return;}
+    hist.innerHTML='<div class="card">'+keys.map(m=>{
+      const[y,mo]=m.split('-');
+      const p=preciosCache[m];
+      return`<div style="margin-bottom:12px">
+        <div style="font-size:13px;font-weight:600;margin-bottom:5px">${meses[parseInt(mo)-1]} ${y}</div>
+        ${p.negocio?`<div style="display:flex;justify-content:space-between;font-size:13px;color:#888;padding:2px 0"><span>Negocio</span><span>$${p.negocio.toLocaleString('es-AR')} / doc.</span></div>`:''}
+        ${p.particular?`<div style="display:flex;justify-content:space-between;font-size:13px;color:#888;padding:2px 0"><span>Particular</span><span>$${p.particular.toLocaleString('es-AR')} / doc.</span></div>`:''}
+      </div>`;
+    }).join('')+'</div>';
+  }
+
+  // ── Toast ────────────────────────────────────────────
+  window.showToast = function(msg) {
+    const t=document.getElementById('toast');
+    t.textContent=msg; t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),2500);
+  }
+
+  // ── Init ─────────────────────────────────────────────
+  const dn=new Date();
+  const dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const mesesCortos=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  document.getElementById('header-date').textContent=dias[dn.getDay()]+' '+dn.getDate()+' de '+mesesCortos[dn.getMonth()];
+
+  setSyncDot('loading');
+  await loadPrecios();
+  setupListener();
+  updateUI();
+</script>
+</body>
+</html>
