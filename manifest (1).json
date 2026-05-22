@@ -1,0 +1,25 @@
+{
+  "name": "Don Ramón Empanadas",
+  "short_name": "Don Ramón",
+  "description": "Sistema de ventas y gastos de empanadas",
+  "start_url": "/don-ramon-empanadas/",
+  "scope": "/don-ramon-empanadas/",
+  "display": "standalone",
+  "background_color": "#FFF8EE",
+  "theme_color": "#C4410C",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
